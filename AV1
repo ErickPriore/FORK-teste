@@ -1,0 +1,102 @@
+using System;
+
+namespace ChatbotSimples
+{
+    // Base de mensagem
+    abstract class Mensagem
+    {
+        public string Conteudo { get; set; }
+        public DateTime DataEnvio { get; private set; } = DateTime.Now;
+
+        public Mensagem(string conteudo) => Conteudo = conteudo;
+
+        public abstract void Exibir();
+    }
+
+    class Texto : Mensagem
+    {
+        public Texto(string conteudo) : base(conteudo) { }
+
+        public override void Exibir()
+            => Console.WriteLine($"[Texto] {Conteudo} | Enviado: {DataEnvio}");
+    }
+
+    class Foto : Mensagem
+    {
+        public string Arquivo, Formato;
+        public Foto(string conteudo, string arquivo, string formato) : base(conteudo)
+        {
+            Arquivo = arquivo; Formato = formato;
+        }
+        public override void Exibir()
+            => Console.WriteLine($"[Foto] {Conteudo} | Arquivo: {Arquivo}.{Formato} | Enviado: {DataEnvio}");
+    }
+
+    class Video : Mensagem
+    {
+        public string Arquivo, Formato, Duracao;
+        public Video(string conteudo, string arquivo, string formato, string duracao) : base(conteudo)
+        {
+            Arquivo = arquivo; Formato = formato; Duracao = duracao;
+        }
+        public override void Exibir()
+            => Console.WriteLine($"[Vídeo] {Conteudo} | {Arquivo}.{Formato} | Duração: {Duracao} | Enviado: {DataEnvio}");
+    }
+
+    class Arquivo : Mensagem
+    {
+        public string ArquivoNome, Formato;
+        public Arquivo(string conteudo, string arquivo, string formato) : base(conteudo)
+        {
+            ArquivoNome = arquivo; Formato = formato;
+        }
+        public override void Exibir()
+            => Console.WriteLine($"[Arquivo] {Conteudo} | {ArquivoNome}.{Formato} | Enviado: {DataEnvio}");
+    }
+
+    // Base de canal
+    abstract class Canal
+    {
+        public string Destino;
+        public Canal(string destino) => Destino = destino;
+
+        public void Enviar(Mensagem m)
+        {
+            Console.WriteLine($"\nEnviando via {GetType().Name} para {Destino}:");
+            m.Exibir();
+        }
+    }
+
+    class WhatsApp : Canal { public WhatsApp(string num) : base(num) { } }
+    class Telegram : Canal { public Telegram(string id) : base(id) { } }
+    class Facebook : Canal { public Facebook(string user) : base(user) { } }
+    class Instagram : Canal { public Instagram(string user) : base(user) { } }
+
+    class Program
+    {
+        static void Main()
+        {
+            var canais = new Canal[]
+            {
+                new WhatsApp("11999999999"),
+                new Telegram("user_bot"),
+                new Facebook("fb_user"),
+                new Instagram("insta_user")
+            };
+
+            var mensagens = new Mensagem[]
+            {
+                new Texto("Olá!"),
+                new Foto("Foto de perfil", "foto", "jpg"),
+                new Video("Vídeo de apresentação", "apresentacao", "mp4", "00:45"),
+                new Arquivo("Documento", "doc", "pdf")
+            };
+
+            foreach (var canal in canais)
+                foreach (var msg in mensagens)
+                    canal.Enviar(msg);
+
+            Console.ReadLine();
+        }
+    }
+}
